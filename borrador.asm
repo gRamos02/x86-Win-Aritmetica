@@ -198,14 +198,14 @@ calcular_multi:
 
 calcular_div:
     ; Dividir num1 / num2
-    xor ax, ax      ; Clear AX register
-    mov al, num1    ; Move dividend to AL
-    cbw            ; Convert byte to word (extend AL to AX)
-    mov bl, num2    ; Move divisor to BL
+    xor ax, ax      ; Limpiar registro ax
+    mov al, num1    ; Mover el dividendo a AL
+    cbw            ; Convertir byte a word 
+    mov bl, num2    ; Mover divisor a bl
     cmp bl, 0      ; Verificar división entre 0
-    je division_error
-    div bl         ; Divide AX by BL, result in AL, remainder in AH
-    add al, '0'    ; Convert result back to ASCII
+    je division_error     
+    div bl         ; Dividir AX por BL, resultado en AL y residuo en AH
+    add al, '0'    ; Convertir el resultado devuelta a ASCII
     mov sum, al
     jmp imprimir_resultado
 
