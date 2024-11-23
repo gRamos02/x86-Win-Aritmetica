@@ -79,12 +79,18 @@ menu_principal:
     
     ; Procesar opción
     cmp al, '1'
-    je mostrar_creditos
+    je short_creditos    ; Usar salto intermedio
     cmp al, '2'
-    je convertir_decimal
+    je short_convertir   ; Usar salto intermedio
     cmp al, '3'
     je salir
     jmp menu_principal
+
+short_creditos:          ; Etiqueta intermedia
+    jmp mostrar_creditos
+
+short_convertir:         ; Etiqueta intermedia
+    jmp convertir_decimal
 
 mostrar_creditos:
     mov dx, OFFSET nueva_linea
