@@ -18,6 +18,7 @@
     prompt_num DB 'Introduzca un numero decimal (0-255): ', '$'
     resultado DB 'Numero en binario: ', '$'
     continuar DB 'Desea convertir otro numero? (S/N): ', '$'
+    error_msg DB 'Numero invalido. Intente de nuevo.', '$'
     
     ; Variables de trabajo
     numero DB 0
@@ -83,8 +84,11 @@ menu_principal:
     cmp al, '2'
     je short_convertir   ; Usar salto intermedio
     cmp al, '3'
-    je salir
+    je short_salir
     jmp menu_principal
+
+short_salir:             ; Etiqueta intermedia
+    jmp salir
 
 short_creditos:          ; Etiqueta intermedia
     jmp mostrar_creditos
@@ -132,23 +136,68 @@ convertir_decimal:
     int 21h
     
     ; Leer número
-    mov ah, 1
+    xor bx, bx          ; Inicializar BX a 0 (acumulador)
+    
+leer_digito:
+    mov ah, 1           ; Función para leer carácter
     int 21h
-    sub al, 30h
-    mov numero, al
+    
+    cmp al, 0Dh         ; ¿Es Enter?
+    je fin_lectura
+    
+    cmp al, '0'         ; Validar si es dígito
+    jb error_lectura
+    cmp al, '9'
+    ja error_lectura
+    
+    sub al, '0'         ; Convertir ASCII a número
+    
+    ; Multiplicar número actual por 10
+    push ax             ; Guardar dígito actual
+    mov ax, bx          ; Mover número actual a AX
+    mov cx, 10          
+    mul cx              ; AX = AX * 10
+    mov bx, ax          ; Guardar resultado en BX
+    pop ax              ; Recuperar dígito
+    
+    ; Sumar nuevo dígito
+    xor ah, ah          ; Limpiar AH
+    add bx, ax          ; Sumar dígito al total
+    
+    cmp bx, 255         ; Verificar si excede 255
+    ja error_lectura
+    
+    jmp leer_digito
+
+error_lectura:
+    mov dx, OFFSET nueva_linea
+    mov ah, 9
+    int 21h
+    
+    mov dx, OFFSET error_msg
+    mov ah, 9
+    int 21h
+    
+    mov dx, OFFSET nueva_linea
+    mov ah, 9
+    int 21h
+    jmp convertir_decimal
+
+fin_lectura:
+    mov numero, bl      ; Guardar número final
     
     ; Convertir a binario
-    mov cx, 8       ; Contador para 8 bits
-    mov bx, 0       ; Índice para guardar bits
+    mov cx, 8           ; Contador para 8 bits
+    mov bx, 0           ; Índice para guardar bits
     
 conversion:
     mov al, numero
-    shr al, 1       ; Desplazar bit a CF
+    shr al, 1           ; Desplazar bit a CF
     mov numero, al
     
-    mov al, '0'     ; Preparar '0'
-    jnc guardar_bit ; Si CF=0, guardar '0'
-    mov al, '1'     ; Si CF=1, cambiar a '1'
+    mov al, '0'         ; Preparar '0'
+    jnc guardar_bit     ; Si CF=0, guardar '0'
+    mov al, '1'         ; Si CF=1, cambiar a '1'
     
 guardar_bit:
     mov binario[bx], al
