@@ -80,20 +80,20 @@ menu_principal:
     
     ; Procesar opción
     cmp al, '1'
-    je short_creditos    ; Usar salto intermedio
+    je short_creditos
     cmp al, '2'
-    je short_convertir   ; Usar salto intermedio
+    je short_convertir
     cmp al, '3'
     je short_salir
     jmp menu_principal
 
-short_salir:             ; Etiqueta intermedia
+short_salir:
     jmp salir
 
-short_creditos:          ; Etiqueta intermedia
+short_creditos:
     jmp mostrar_creditos
 
-short_convertir:         ; Etiqueta intermedia
+short_convertir:
     jmp convertir_decimal
 
 mostrar_creditos:
@@ -188,7 +188,8 @@ fin_lectura:
     
     ; Convertir a binario
     mov cx, 8           ; Contador para 8 bits
-    mov bx, 0           ; Índice para guardar bits
+    mov si, 0           ; Índice para binario
+    mov di, 7           ; Índice inverso
     
 conversion:
     mov al, numero
@@ -200,8 +201,11 @@ conversion:
     mov al, '1'         ; Si CF=1, cambiar a '1'
     
 guardar_bit:
-    mov binario[bx], al
-    inc bx
+    push bx
+    mov bx, di          ; Usar DI como índice
+    mov [binario + bx], al
+    pop bx
+    dec di              ; Decrementar índice inverso
     loop conversion
     
     ; Mostrar resultado
@@ -230,10 +234,13 @@ guardar_bit:
     int 21h
     
     cmp al, 'S'
-    je convertir_decimal
+    je short_convertir_decimal
     cmp al, 's'
-    je convertir_decimal
+    je short_convertir_decimal
     jmp menu_principal
+
+short_convertir_decimal:
+    jmp convertir_decimal
 
 salir:
     mov ax, 4C00h
