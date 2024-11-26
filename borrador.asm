@@ -141,7 +141,7 @@ leer_num1:
     int 21h
 
     xor bx, bx      ; Limpiar BX para acumular número
-    mov cx, 5       ; Máximo 5 dígitos
+    mov cx, 3       ; Máximo 3 dígitos
 
 leer_digito1:
     mov ah, 08h
@@ -190,7 +190,7 @@ leer_num2:
     int 21h
 
     xor bx, bx
-    mov cx, 5
+    mov cx, 3
 
 leer_digito2:
     mov ah, 08h
@@ -238,14 +238,23 @@ leer_operacion:
     int 21h
 
 esperar_operador:
-    mov ah, 01h
+    mov ah, 08h         ; Usar 08h para entrada sin eco
+    int 21h
+    
+    cmp al, '-'
+    je operador_valido
+    cmp al, '/'
+    je operador_valido
+    jmp esperar_operador ; Ignorar cualquier otra entrada
+
+operador_valido:
+    mov dl, al          ; Mostrar operador válido
+    mov ah, 02h
     int 21h
     
     cmp al, '-'
     je hacer_resta
-    cmp al, '/'
-    je hacer_division
-    jmp esperar_operador
+    jmp hacer_division
 
 hacer_resta:
     mov ax, num1
